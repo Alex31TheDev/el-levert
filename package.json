@@ -1,0 +1,19 @@
+{
+  "name": "el-levert",
+  "version": "1.0.0",
+  "description": "Romanian version of Leveret by Neeve",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alex31TheDev/el-levert.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Alex31TheDev/el-levert/issues"
+  },
+  "homepage": "https://github.com/Alex31TheDev/el-levert#readme"
+}
