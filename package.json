@@ -4,7 +4,13 @@
   "description": "Romanian version of Leveret by Neeve",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "npm run clean:windows && npm run clean:linux",
+    "clean:windows": "node -e \"if (process.platform === 'win32') process.exit(1)\" || , if exist build rmdir /Q /S build",
+    "clean:linux": "node -e \"if (process.platform !== 'win32') process.exit(1)\" || rm -rf build",
+    "build": "eslint . --ext .ts && tsc --build",
+    "start": "npm run build && node build/index.js",
+    "lint": "eslint . --ext .ts"
   },
   "repository": {
     "type": "git",
