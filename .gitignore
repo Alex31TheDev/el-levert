@@ -132,3 +132,6 @@ vscode/
 
 #ts
 build/
+
+#bot
+config/auth.json
