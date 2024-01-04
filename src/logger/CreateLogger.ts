@@ -1,0 +1,142 @@
+import winston from "winston";
+import path from "path";
+
+import CreateLoggerError from "./LoggerError";
+import { ILoggerConfig, LoggerFormat } from "./LoggerConfig";
+
+const validForm = Object.getOwnPropertyNames(winston.format).filter(x => !["length", "combine"].includes(x));
+
+function getFormat(names: LoggerFormat) {
+    if (names === undefined) {
+        return winston.format.simple();
+    } else if (typeof names === "string") {
+        names = [names];
+    }
+
+    const formats = names.map(x => {
+        let name: string, prop;
+
+        if (typeof x === "object") {
+            ({ name: name, prop: prop } = x);
+        } else {
+            name = x;
+        }
+
+        if (!validForm.includes(name)) {
+            throw new CreateLoggerError("Invalid format: " + x);
+        }
+
+        return winston.format[name as keyof typeof winston.format](prop);
+    });
+
+    return winston.format.combine(...formats);
+}
+
+const enumerateErrorFormat = winston.format(info => {
+    if (info.message instanceof Error) {
+        info.message = Object.assign(
+            {
+                message: info.message.message,
+                stack: info.message.stack
+            },
+            info.message
+        );
+    }
+
+    if (info instanceof Error) {
+        return Object.assign(
+            {
+                message: info.message,
+                stack: info.stack
+            },
+            info
+        );
+    }
+
+    return info;
+});
+
+function getFilename(name: string) {
+    const file = path.basename(name),
+        dir = path.dirname(name),
+        date = new Date().toISOString().substring(0, 10);
+
+    return path.join(dir, date + "-" + file);
+}
+
+function getFileTransport(names?: LoggerFormat, filename?: string) {
+    if (names === undefined) {
+        throw new CreateLoggerError("A file format must be provided if outputting to a file");
+    }
+
+    if (filename === undefined) {
+        throw new CreateLoggerError("A filename must be specified");
+    }
+
+    const format = getFormat(names),
+        timestampedFilename = getFilename(filename);
+
+    const file = new winston.transports.File({
+        filename: timestampedFilename,
+        format
+    });
+
+    return file;
+}
+
+function getConsoleTransport(names?: LoggerFormat) {
+    if (names === undefined) {
+        throw new CreateLoggerError("A console format must be provided if outputting to the console");
+    }
+
+    const format = getFormat(names),
+        console = new winston.transports.Console({
+            format
+        });
+
+    return console;
+}
+
+/**
+ * Creates a logger from config options.
+ *
+ * @param {ILoggerConfig} config
+ * @return {*}
+ */
+function createLogger(config: ILoggerConfig) {
+    if (!config.fileOutput && !config.consoleOutput) {
+        throw new CreateLoggerError("Must provide an output method");
+    }
+
+    const transports = [];
+
+    if (config.fileOutput) {
+        const fileTransport = getFileTransport(config.fileFormat, config.filename);
+        transports.push(fileTransport);
+    }
+
+    if (config.consoleOutput) {
+        const consoleTransport = getConsoleTransport(config.consoleFormat);
+        transports.push(consoleTransport);
+    }
+
+    const level = config.level ?? "debug";
+    let meta;
+
+    if (config.name !== undefined) {
+        meta = {
+            service: config.name
+        };
+    }
+
+    const logger = winston.createLogger({
+        level,
+        format: enumerateErrorFormat(),
+        transports,
+        defaultMeta: meta
+    });
+
+    return logger;
+}
+
+export default createLogger;

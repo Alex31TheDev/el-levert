@@ -1,3 +1,5 @@
-type Config = object;
+type Config = {
+    logPath: string;
+};
 
 export default Config;

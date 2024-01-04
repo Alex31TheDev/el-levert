@@ -1,5 +1,5 @@
 type Auth = {
-    token: string
+    token: string;
 };
 
 export default Auth;

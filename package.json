@@ -11,7 +11,7 @@
     "build": "eslint . --ext .ts && tsc --build",
     "start": "npm run build && node build/index.js",
     "lint": "eslint . --ext .ts",
-    "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write"
+    "prettier-format": "prettier --config .prettierrc --write src/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "discord.js": "^14.14.1"
+    "discord.js": "^14.14.1",
+    "winston": "^3.11.0"
   }
 }
